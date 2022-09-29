@@ -1,0 +1,29 @@
+{
+  "name": "project-urlshortnergroupx",
+  "version": "1.0.0",
+  "description": "Url Shortning",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/24avi09/project-urlShortnerGroupX.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/24avi09/project-urlShortnerGroupX/issues"
+  },
+  "homepage": "https://github.com/24avi09/project-urlShortnerGroupX#readme",
+  "dependencies": {
+    "config": "^3.3.8",
+    "express": "^4.18.1",
+    "mongoose": "^6.6.2",
+    "nodemon": "^2.0.20",
+    "shortid": "^2.2.16",
+    "valid-url": "^1.0.9"
+  }
+}
