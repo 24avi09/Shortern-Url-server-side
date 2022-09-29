@@ -5,16 +5,16 @@ const config = require("config");
 
 const createUrlShortner = async (req, res) => {
   try {
-    const { longUrl } = req.body;
+    const { data } = req.body;
     // const baseUrl = config.get("baseUrl");
 
-    if (!validUrl.isUri(longUrl)) {
+    if (!validUrl.isUri(data)) {
       return res
         .status(400)
         .send({ status: false, message: "Enter a valid longUrl" });
     }
 
-    let url = await urlModel.findOne({ longUrl });
+    let url = await urlModel.findOne({ data });
 
     if (url) {
       return res
@@ -23,14 +23,18 @@ const createUrlShortner = async (req, res) => {
     }
 
     let urlCode = shortId.generate();
+    let shortUrl=`http://localhost:3000/${urlCode}`
+    data.urlCode=urlCode
+    data.shortUrl=shortUrl
+    
 
     url = new urlModel({
       urlCode,
       longUrl,
     });
 
-    let data = await url.save();
-    return res.status(201).send({ status: true, data: data });
+    let data1 = await url.save();
+    return res.status(201).send({ status: true, data: data1 });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
