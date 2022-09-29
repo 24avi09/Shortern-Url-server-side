@@ -1,61 +1,75 @@
 let validUrl = require("valid-url");
 const shortId = require("shortid");
 const urlModel = require("../model/urlmodel");
-const config = require("config");
+
+
+
+/////===========================================  create shortUrl ========================================================//////
 
 const createUrlShortner = async (req, res) => {
   try {
-    const { data } = req.body;
-    // const baseUrl = config.get("baseUrl");
+    const { longUrl } = req.body;
 
-    if (!validUrl.isUri(data)) {
+    if (!validUrl.isUri(longUrl)) {
       return res
         .status(400)
         .send({ status: false, message: "Enter a valid longUrl" });
     }
 
-    let url = await urlModel.findOne({ data });
+    let findUrl = await urlModel.findOne({ longUrl }).select({_id:0,longUrl:1,shortUrl:1,urlCode:1});
 
-    if (url) {
+    if (findUrl) {
       return res
         .status(200)
-        .send({ status: true, message: "url already exist", data: url });
+        .send({ status: true, data: findUrl });
     }
 
-    let urlCode = shortId.generate();
-    let shortUrl=`http://localhost:3000/${urlCode}`
-    data.urlCode=urlCode
-    data.shortUrl=shortUrl
+    let urlCode = shortId.generate().toLowerCase();
     
+    let shortUrl = `http://localhost:3000/${urlCode}`;
 
-    url = new urlModel({
+    let createUrl = {
       urlCode,
       longUrl,
-    });
+      shortUrl,
+    };
 
-    let data1 = await url.save();
-    return res.status(201).send({ status: true, data: data1 });
+    let create = await urlModel.create(createUrl);
+
+    return res.status(201).send({ status: true, data: createUrl });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
 };
 
-module.exports = { createUrlShortner };
 
-// let a ="https://stackoverflow.com/questions/30931079/validating-a-url-in-node"
 
-// // if (validUrl.isUri(a)){
-// //     console.log('Looks like an URI');
-// // } else {
-// //     console.log('Not a URI');
-// // }
 
-// function ValidURL(URL) {
+////================================================ get long url (redirect)  ========================================================////////
 
-//     console.log(validUrl.isUri(URL))
-//     return validUrl.isUri(URL)
-// }
 
-// ValidURL(a)
 
-// module.exports = ValidURL;
+
+let getUrl = async (req, res) => {
+  try {
+    let urlCode = req.params.urlCode;
+    if (!urlCode) {
+      return res
+        .status(400)
+        .send({ status: false, message: "Send urlCode from params" });
+    }
+
+    let findUrl = await urlModel.findOne({ urlCode });
+
+    if (!findUrl) {
+      return res.status(400).send({ status: false, message: "url not found" });
+    }
+    let objUrl = findUrl.toObject();
+
+    return res.status(200).redirect(objUrl.longUrl);
+  } catch (error) {
+    return res.status(500).send({ status: false, message: error.message });
+  }
+};
+
+module.exports = { createUrlShortner, getUrl };
