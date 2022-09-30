@@ -1,8 +1,6 @@
-let validUrl = require("valid-url");
 const shortId = require("shortid");
 const urlModel = require("../model/urlmodel");
-
-
+const axios = require("axios");
 
 /////===========================================  create shortUrl ========================================================//////
 
@@ -10,22 +8,40 @@ const createUrlShortner = async (req, res) => {
   try {
     const { longUrl } = req.body;
 
-    if (!validUrl.isUri(longUrl)) {
+    if (Object.keys(req.body).length === 0) {
       return res
         .status(400)
-        .send({ status: false, message: "Enter a valid longUrl" });
+        .send({ status: false, message: "Send data from body" });
     }
 
-    let findUrl = await urlModel.findOne({ longUrl }).select({_id:0,longUrl:1,shortUrl:1,urlCode:1});
+    let options = {
+      method: "get",
+      url: longUrl,
+    };
+    let result = await axios(options).catch(() => "url invalid");
+
+    if (result === "url invalid") {
+      return res
+        .status(400)
+        .send({ status: false, message: "longUrl invalid" });
+    }
+
+    let findUrl = await urlModel
+      .findOne({ longUrl })
+      .select({ _id: 0, longUrl: 1, shortUrl: 1, urlCode: 1 });
 
     if (findUrl) {
       return res
         .status(200)
-        .send({ status: true, data: findUrl });
+        .send({
+          status: true,
+          message: "longUrl already exist",
+          data: findUrl,
+        });
     }
 
     let urlCode = shortId.generate().toLowerCase();
-    
+
     let shortUrl = `http://localhost:3000/${urlCode}`;
 
     let createUrl = {
@@ -42,13 +58,7 @@ const createUrlShortner = async (req, res) => {
   }
 };
 
-
-
-
 ////================================================ get long url (redirect)  ========================================================////////
-
-
-
 
 let getUrl = async (req, res) => {
   try {

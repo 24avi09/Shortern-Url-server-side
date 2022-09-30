@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/24avi09/project-urlShortnerGroupX#readme",
   "dependencies": {
+    "axios": "^0.27.2",
     "config": "^3.3.8",
     "express": "^4.18.1",
     "mongoose": "^6.6.2",
