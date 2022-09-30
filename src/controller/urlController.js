@@ -66,7 +66,7 @@ let getUrl = async (req, res) => {
     }
     let objUrl = findUrl.toObject();
 
-    return res.status(200).redirect(objUrl.longUrl);
+    return res.status(302).redirect(objUrl.longUrl);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }

@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 // const validUrl = validUrl.isUri()
 
 
-const urlSchma = mongoose.Schema({
+const urlSchma = new mongoose.Schema({
     urlCode: {
         type: String,
         require: true,
