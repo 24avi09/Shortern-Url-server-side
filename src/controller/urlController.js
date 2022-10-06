@@ -1,6 +1,7 @@
 const shortId = require("shortid");
 const urlModel = require("../model/urlmodel");
 const axios = require("axios");
+const { GET_ASYNC, SET_ASYNC } = require("../Redis/redis");
 
 /////===========================================  create shortUrl ========================================================//////
 
@@ -26,23 +27,50 @@ const createUrlShortner = async (req, res) => {
         .send({ status: false, message: "longUrl invalid" });
     }
 
+    let cacheURLData = await GET_ASYNC(`${longUrl}`);
+
+    if (cacheURLData) {
+      cacheURLData = JSON.parse(cacheURLData);
+      let cacheURLDataObj = {
+        longUrl: cacheURLData.longUrl,
+        shortUrl: cacheURLData.shortUrl,
+        urlCode: cacheURLData.urlCode,
+      };
+
+      return res
+        .status(200)
+        .send({
+          status: true,
+          message: `This URL is Already Present in Cache! So use this shortURL: ${cacheURLData.shortUrl}`,
+          data: cacheURLDataObj,
+        });
+    }
+
     let findUrl = await urlModel
       .findOne({ longUrl })
       .select({ _id: 0, longUrl: 1, shortUrl: 1, urlCode: 1 });
 
     if (findUrl) {
+      await SET_ASYNC(`${longUrl}`, 24 * 60 * 60, JSON.stringify(findUrl));
+
+      let isPresentObj = {
+        longUrl: findUrl.longUrl,
+        shortUrl: findUrl.shortUrl,
+        urlCode: findUrl.urlCode,
+      };
+
       return res
         .status(200)
         .send({
           status: true,
-          message: "longUrl already exist",
-          data: findUrl,
+          message: `For This LongUrl use this ShortUrl: ${findUrl.shortUrl} which is already Registered in DB`,
+          data: isPresentObj,
         });
     }
 
     let urlCode = shortId.generate().toLowerCase();
-
-    let shortUrl = `http://localhost:3000/${urlCode}`;
+    let baseUrl = `http://localhost:3000/`;
+    let shortUrl = baseUrl + urlCode;
 
     let createUrl = {
       urlCode,
@@ -63,20 +91,28 @@ const createUrlShortner = async (req, res) => {
 let getUrl = async (req, res) => {
   try {
     let urlCode = req.params.urlCode;
-    if (!urlCode) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Send urlCode from params" });
+
+    let cacheURLData = await GET_ASYNC(`${urlCode}`);
+
+    if (cacheURLData) {
+      cacheURLData = JSON.parse(cacheURLData);
+
+      return res.status(302).redirect(cacheURLData.longUrl);
+    } else {
+      let findUrl = await urlModel.findOne({ urlCode });
+
+      if (!findUrl) {
+        return res
+          .status(400)
+          .send({ status: false, message: "url not found" });
+      }
+
+      let objUrl = findUrl.toObject();
+
+      await SET_ASYNC(`${urlCode}`, 24 * 60 * 60, JSON.stringify(findUrl));
+
+      res.status(302).redirect(findUrl.longUrl);
     }
-
-    let findUrl = await urlModel.findOne({ urlCode });
-
-    if (!findUrl) {
-      return res.status(400).send({ status: false, message: "url not found" });
-    }
-    let objUrl = findUrl.toObject();
-
-    return res.status(302).redirect(objUrl.longUrl);
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
