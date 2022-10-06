@@ -73,9 +73,9 @@ const createUrlShortner = async (req, res) => {
     let shortUrl = baseUrl + urlCode;
 
     let createUrl = {
-      urlCode,
       longUrl,
       shortUrl,
+      urlCode,
     };
 
     let create = await urlModel.create(createUrl);
