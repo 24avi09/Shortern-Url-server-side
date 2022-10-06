@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
-// var validUrl = require('valid-url');
-// const validUrl = validUrl.isUri()
+
 
 
 const urlSchma = new mongoose.Schema({
@@ -14,11 +13,13 @@ const urlSchma = new mongoose.Schema({
     longUrl: {
         type: String,
         require: true,
+        trim:true
     },
     shortUrl: {
         type: String,
         require: true,
-        unique: true
+        unique: true,
+        trim:true
     }
 },
 { timestamps: true });
