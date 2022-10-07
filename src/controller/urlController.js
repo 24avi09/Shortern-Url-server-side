@@ -2,6 +2,7 @@ const shortId = require("shortid");
 const urlModel = require("../model/urlmodel");
 const axios = require("axios");
 const { GET_ASYNC, SET_ASYNC } = require("../Redis/redis");
+const { findOneAndUpdate } = require("../model/urlmodel");
 
 /////===========================================  create shortUrl ========================================================//////
 
@@ -103,7 +104,7 @@ let getUrl = async (req, res) => {
 
       if (!findUrl) {
         return res
-          .status(400)
+          .status(404)
           .send({ status: false, message: "url not found" });
       }
 

@@ -8,9 +8,7 @@ app.use(bodyparser.json())
 
 
 
-mongoose.connect('mongodb+srv://abhi03:UQkqPECmlouMcNjb@cluster1.kwsn7az.mongodb.net/group12Database', {
-    useNewUrlParser: true
-})
+mongoose.connect('mongodb+srv://abhi03:UQkqPECmlouMcNjb@cluster1.kwsn7az.mongodb.net/group12Database')
 .then( ()=> console.log("MongoDb is connected"))
 .catch( err => console.log(err))
 
