@@ -2,7 +2,6 @@ const shortId = require("shortid");
 const urlModel = require("../model/urlmodel");
 const axios = require("axios");
 const { GET_ASYNC, SET_ASYNC } = require("../Redis/redis");
-const { findOneAndUpdate } = require("../model/urlmodel");
 
 /////===========================================  create shortUrl ========================================================//////
 
@@ -112,7 +111,7 @@ let getUrl = async (req, res) => {
 
       await SET_ASYNC(`${urlCode}`, 24 * 60 * 60, JSON.stringify(findUrl));
 
-      res.status(302).redirect(findUrl.longUrl);
+      return res.status(302).redirect(findUrl.longUrl);
     }
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
